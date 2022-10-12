@@ -1,6 +1,6 @@
 # DeeptransTool
 
-[![License: GPLv3](https://img.shields.io/badge/License-GPLv3-yellowgreen.svg?style=flat-square)](https://www.gnu.org/licenses/gpl-3.0.en.html) [![Python 3.10](https://img.shields.io/badge/Python-3.10-blue.svg?style=flat-square&logo=python)](https://www.python.org/downloads/release/python-310/) [![PyPi Package](https://img.shields.io/badge/PyPi_Package-pip_install_DeeptransTool-yellow.svg?style=flat-square&logo=pypi)](https://pypi.org/project/ConvTool/)
+[![License: GPLv3](https://img.shields.io/badge/License-GPLv3-yellowgreen.svg?style=flat-square)](https://www.gnu.org/licenses/gpl-3.0.en.html) [![Python 3.10](https://img.shields.io/badge/Python-3.10-blue.svg?style=flat-square&logo=python)](https://www.python.org/downloads/release/python-310/) [![PyPi Package](https://img.shields.io/badge/PyPi_Package-pip_install_DeeptransTool-yellow.svg?style=flat-square&logo=pypi)](https://pypi.org/project/DeeptransTool/)
 
 *The package is still under development, you may find serious bugs or features like the pdf translator still missing. Any serious bugs please let me know by discord!*
 
