@@ -1,6 +1,4 @@
 # Selenium Imports!
-from base64 import decode
-from multiprocessing.sharedctypes import Value
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
@@ -12,11 +10,15 @@ from selenium.webdriver.support.ui import Select
 from webdriver_manager.chrome import ChromeDriverManager
 
 
+# PDF reader.
+from PyPDF2 import PdfReader
+
+
+
 
 # Others Imports:
 import time
 import os
-
 
 
 
@@ -63,7 +65,7 @@ def file_translate(route:str, string_characters = 4999, l_from = 'en', l_to = 'e
 
 
     # Extensiones de texto validas que usaremos!
-    text_files_extensions = ['srt', 'txt', 'html', 'log', 'csv']
+    text_files_extensions = ['srt', 'txt', 'html', 'log', 'csv', 'pdf']
 
 
 
@@ -73,17 +75,41 @@ def file_translate(route:str, string_characters = 4999, l_from = 'en', l_to = 'e
     if string_characters >= 5000:
         raise Exception('(MaxCharactersError, error 01) Sorry :(, we have limitations with the web, therefore, as maximum characters at a time, we can translate 4999 per string. What we do, is that we pass strings of this length to the browser, when we already split your text into small pieces.')
 
-    if extension not in text_files_extensions:
+    elif extension not in text_files_extensions:
         raise ValueError('(FileExtensionError, error 03) The file you provided seems not to be a valid text file :c')
 
+
+    elif new_file_extension == 'pdf':
+        raise ValueError("(PDFCreateError, error 04) Sorry, we can't build a pdf from your main file (is pdf file) :( Choose as output of your new file, a valid plain text extension!")
+
+    elif new_file == False and extension == 'pdf':
+        raise ValueError('(PDFNewFileError, error 05) If you want to translate a pdf file, it is mandatory to create a new file :/. Fix this error by setting new_file to True.')
     # ============================
 
 
 
 
-    
-    f = open(route, 'r+', encoding = 'utf-8')
-    lines = f.readlines()
+    if extension != 'pdf':
+        f = open(route, 'r+', encoding = 'utf-8')
+        lines = f.readlines()
+
+    else:
+        print('(EXPERIMENTAL PDF FUNCTION ALERT!) Your file is a PDF! Remember, working with PDF files can lead to serious problems with how paragraphs and text are constructed, so you may experience line breaks and tab errors in your text.\n\n')
+
+
+
+        lines = []
+        pdf_r = PdfReader(route)
+        pdf_number_page = len(pdf_r.pages)
+
+        for page_n in list(range(0, pdf_number_page, 1)):
+            page = pdf_r.pages[page_n]
+
+
+            text = str(page.extract_text()).split('\n')
+
+            for line in text:
+                lines.append(line)
 
 
     
@@ -113,7 +139,66 @@ def file_translate(route:str, string_characters = 4999, l_from = 'en', l_to = 'e
     
     text_list = []
     
-    
+    # ====================================
+    text_re = raw_text.split(' ')
+
+
+    # print(text_re)
+    temp_list = []
+    temp_text = ''
+
+    for tb in text_re:
+
+        if len(tb) > string_characters:
+            print(f'Algún texto contiene más de {string_characters} letras. Quiere decir que tiene más de 5000 carácteres sin ningún espacio, cosa extraña.')
+
+
+        elif len(temp_text) + len(tb) <= string_characters:
+            temp_text = temp_text + f' {tb}'
+            temp_list.append(temp_text)
+
+        else:
+            temp_text = tb
+            temp_list.append(tb)
+
+
+
+
+
+    # for c, tb in enumerate(text_re):
+    #     if len(re) + len(tb) <= string_characters:
+    #         re = re + f' {tb}'
+        
+    #     else:
+    #         re_list.append(re)
+    #         re = ''
+
+            
+    #         for d in range(c):
+    #             text_re.pop(0)
+                
+            
+    #     continue
+
+            
+    # print(text_re)
+        
+
+
+
+
+    # for r in range(len(text_re)):
+    #     for c, tb in enumerate(text_re):
+    #         if len(re) + len(tb) <= string_characters:
+    #             re = re + f' {tb}'
+
+    #         text_re.remove(tb)
+    #     re_list.append(re)
+    #     continue
+
+    # print(re_list)
+
+
     # =====================================
     
     
@@ -137,12 +222,17 @@ def file_translate(route:str, string_characters = 4999, l_from = 'en', l_to = 'e
                              # virgen.
                 
         string = string.replace(' ', '%20') # Para los espacios!
+        string = string.replace(',', '%2C') # Para los espacios!
+        string = string.replace('\t', r'%20%20%20%20') # Para los espacios!
         string = string.replace('\n', '%0A') # Para los saltos de linea!
         string = string.replace('?', '%3F') # Para los signos de interrogación.
         
     
         string = string.replace('<i>', '--i--') # Para éstas etiquetas, que al parecer daban bug.
         string = string.replace('</i>', '--ci--') # Para éstas etiquetas, que al parecer daban bug.
+        string = string.replace('/', r'%5C%2F')
+        string = string.replace('\\', r'%5C%5C')
+        string = string.replace('\\', r'%5C%5C')
         
         
         string = string.replace('-->', '--8') # Para este tipo de signo (o conjunto de singos) y que no de bug. Luego volvemos todo a la normalidad.
@@ -162,13 +252,6 @@ def file_translate(route:str, string_characters = 4999, l_from = 'en', l_to = 'e
         url_pro = raw_consult_url + string_processed
         urls_list.append(url_pro)
         
-    # print(urls_list[-1])
-    
-        
-
-        
-        
-        # break # TODO: quitar este break.
     
 
     
@@ -185,33 +268,31 @@ def file_translate(route:str, string_characters = 4999, l_from = 'en', l_to = 'e
     
     text_translate = ''
     
-    
+    # print(urls_list)
     
     print('Traduciendo archivo!!')
 
     browser = webdriver.Chrome(ChromeDriverManager().install(), options = chrome_options)
     
     for link_part in urls_list:
+
+
         browser.get(link_part)
+        
         time.sleep(5) #TODO USAR ES NECESARIO. EL TIEMPO DE ESPERA PUEDE VARIAR, VER QUE TAL FUNCIONA CON UN TIEMPO MÁS BAJO. 
 
         translate_save = browser.find_element(By.ID, 'target-dummydiv')
 
-        text_translate = text_translate + translate_save.get_attribute('outerHTML')[103:-8]
-        # print(translate_save.get_attribute('outerHTML')[103:-8])
-
-
-
-        
+        text_translate = text_translate + translate_save.get_attribute('outerHTML')
+        text_f = text_translate[text_translate.find('>') + 1:-8]
 
 
 
     
-    text_translate = text_translate.replace('--8', '-->') # Para los espacios!
-    text_translate = text_translate.replace('--i--', '<i>') # Para éstas etiquetas, que al parecer daban bug.
-    text_translate = text_translate.replace('--ci--', '</i>')
+    text_f = text_f.replace('--8', '-->') # Para los espacios!
+    text_f = text_f.replace('--i--', '<i>') # Para éstas etiquetas, que al parecer daban bug.
+    text_f = text_f.replace('--ci--', '</i>')
 
-    # print(text_translate)
 
 
 
@@ -225,7 +306,7 @@ def file_translate(route:str, string_characters = 4999, l_from = 'en', l_to = 'e
 
 
             translate_web = open(new_name, 'wb+')
-            translate_web.write(text_translate.encode())
+            translate_web.write(text_f.encode())
 
             translate_web.close()
 
@@ -238,7 +319,7 @@ def file_translate(route:str, string_characters = 4999, l_from = 'en', l_to = 'e
         translate_web = open(route, 'wb+')
         translate_web.truncate()
         
-        translate_web.write(text_translate.encode())
+        translate_web.write(text_f.encode())
         
         
         translate_web.close()
@@ -340,12 +421,17 @@ def string_translate(text, string_characters = 4999, l_from = 'en', l_to = 'es')
                              #TODO: VER SI NECESITO AÑADIR/CAMBIAR OTROS CARACTERES (que casi seguro que sí).
                 
         string = string.replace(' ', '%20') # Para los espacios!
+        string = string.replace(',', '%2C') # Para los espacios!
+        string = string.replace('\t', r'%20%20%20%20') # Para los espacios!
         string = string.replace('\n', '%0A') # Para los saltos de linea!
         string = string.replace('?', '%3F') # Para los signos de interrogación.
         
     
         string = string.replace('<i>', '--i--') # Para éstas etiquetas, que al parecer daban bug.
         string = string.replace('</i>', '--ci--') # Para éstas etiquetas, que al parecer daban bug.
+        string = string.replace('/', r'%5C%2F')
+        string = string.replace('\\', r'%5C%5C')
+        string = string.replace('\\', r'%5C%5C')
         
         
         string = string.replace('-->', '--8') # Para este tipo de signo (o conjunto de singos) y que no de bug. Luego volvemos todo a la normalidad.
@@ -400,8 +486,8 @@ def string_translate(text, string_characters = 4999, l_from = 'en', l_to = 'es')
 
         translate_save = browser.find_element(By.ID, 'target-dummydiv')
 
-        text_translate = text_translate + translate_save.get_attribute('outerHTML')[103:-8]
-
+        text_translate = text_translate + translate_save.get_attribute('outerHTML')
+        text_f = text_translate[text_translate.find('>') + 1:-8]
 
 
         
@@ -409,9 +495,9 @@ def string_translate(text, string_characters = 4999, l_from = 'en', l_to = 'es')
 
 
     
-    text_translate = text_translate.replace('--8', '-->') # Para los espacios!
-    text_translate = text_translate.replace('--i--', '<i>') # Para éstas etiquetas, que al parecer daban bug.
-    text_translate = text_translate.replace('--ci--', '</i>') # Para las de cierre.
+    text_f = text_f.replace('--8', '-->') # Para los espacios!
+    text_f = text_f.replace('--i--', '<i>') # Para éstas etiquetas, que al parecer daban bug.
+    text_f = text_f.replace('--ci--', '</i>') # Para las de cierre.
     browser.close() # Se cierra el navegador para que no consuma recursos obviamente.
 
 
@@ -421,7 +507,9 @@ def string_translate(text, string_characters = 4999, l_from = 'en', l_to = 'es')
     
     print(f'\n\nSe ha traducido correctamente el texto!\n\n')
 
-    return text_translate
+    return text_f
 
 
 
+
+a = file_translate('C:/Users/ferdh/Downloads/Izquierda.txt', 4999, 'es', 'en', True, 'txt')
