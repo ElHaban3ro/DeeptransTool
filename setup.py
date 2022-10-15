@@ -13,9 +13,9 @@ setup(
     long_description = long_description,
     long_description_content_type = 'text/markdown',
     packages = ['DTT'],
-    version = '1.1',
+    version = '1.3',
     license = 'GPLv3',
-    description = "Want to translate using the world's best translator, DeepL, but don't want to give out your credit card? Use DeeptransTool and translate EVERYTHING you want, for FREE! Here is a solution for accessing the DeepL API with Python. 🐸",
+    description = "Use the world's best translator (DeepL) to translate your text files or text itself!! All without having to provide your credit card or be limited by the API. 🐸",
     author = 'ElHaban3ro',
     author_email = 'habanferd@gmail.com',
     url = 'https://github.com/ElHaban3ro/DeeptransTool',
@@ -23,5 +23,5 @@ setup(
     classifiers = [
         'Programming Language :: Python :: 3.10'
     ],
-    install_requires=['selenium==4.5.0', 'webdriver-manager==3.8.3']
+    install_requires=['selenium==4.5.0', 'webdriver-manager==3.8.3', 'PyPDF2']
 )

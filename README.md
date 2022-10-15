@@ -12,6 +12,16 @@ The **perfect** module to make ***translations*** with no character limitations,
 To fulfill the **purpose**, we make use of ***Selenium*** and the browser [Chrome](https://www.google.com/chrome/) therefore, it is ***necessary** to have the browser installed ***on your computer***. If you are on **windows**, download the ***latest version***, if you are on ***linux***, we recommend you to download [this](https://github.com/ElHaban3ro/DeeptransTool/blob/main/packages/google-chrome-linux64-105.0.5195.125.deb?raw=true) version. 
 
 
+
+## (v1.3) ¿What's New?
+---
+- Support for reading and translating PDF's. (Remember that pdf's are a more complex file type than a simple txt or srt, therefore, when creating a new file you may experience line breaks that are not applicable or not applicable at all, this, because of how a pdf is composed). You can use the function to translate PDF's ONLY by creating a new file.
+- Error handling.
+- Support for more characters (it is a problem how some signs that are passed by the url are translated, therefore, signs like "/", are translated by the translator as "%5C%2F", and if they are not corrected, they can cause serious problems. I will be attentive to your feedback to add this kind of characters to the package so that they do not cause errors).
+
+- A better way to cut the text and pass it to DeepL (apparently, it sometimes caused errors due to words being cut off).
+
+
 ## Functions
 ---
 
@@ -61,7 +71,7 @@ To use this package, the best idea is to do it through ***pip***:
 ```bash
 pip install DeeptransTool
 ```
-***IT IS VERY IMPORTANT THAT THE "C" AND THE "T" ARE CAPITALIZED.***
+***IT IS VERY IMPORTANT THAT THE "D" AND THE "T" ARE CAPITALIZED.***
 
 
 Or, on the contrary, you can **clone** this repository and access it:
@@ -90,6 +100,15 @@ from DTT.deepLTranslate import file_translate
 mi_traduccion = file_translate('C:/miruta/archivo.txt', 4999, 'es', 'en', True, 'srt')
 ```
 
+#### Text Files Allow:
+- srt
+- txt
+- html
+- log
+- csv
+- pdf
+
+***¿more? Send it***
 
 
 

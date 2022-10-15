@@ -93,6 +93,8 @@ def file_translate(route:str, string_characters = 4999, l_from = 'en', l_to = 'e
         f = open(route, 'r+', encoding = 'utf-8')
         lines = f.readlines()
 
+        f.close()
+
     else:
         print('(EXPERIMENTAL PDF FUNCTION ALERT!) Your file is a PDF! Remember, working with PDF files can lead to serious problems with how paragraphs and text are constructed, so you may experience line breaks and tab errors in your text.\n\n')
 
@@ -120,10 +122,12 @@ def file_translate(route:str, string_characters = 4999, l_from = 'en', l_to = 'e
     
     for raw_line in lines: # Inserto TODO en una sola linea. Esto para trabajar
                            # mejor con la cantidad de carácteres.
-        raw_text = raw_text + raw_line
+        raw_text = raw_text + str(raw_line)
 
 
-    if len(raw_text) > 5000:
+
+
+    if len(raw_text) > string_characters:
         jumps = list(range(0, len(raw_text), string_characters)) # Generamos una lista con los 
                                                                  # saltos necesarios de con saltos 
                                                                  # de {string_characters}
@@ -137,84 +141,48 @@ def file_translate(route:str, string_characters = 4999, l_from = 'en', l_to = 'e
         
     
     
-    text_list = []
     
     # ====================================
-    text_re = raw_text.split(' ')
+
+    text_list = []
+    index_list = []
+    new_jumps = [0]
+
+    for ei, index_space in enumerate(raw_text):
+        if index_space == ' ':
+            index_list.append(ei)
 
 
-    # print(text_re)
-    temp_list = []
-    temp_text = ''
+    for nj in jumps[1:]:
+        n_jumps = min(index_list, key = lambda x: abs(x - nj)) # Esto devuelve el indíce de los espacios!
 
-    for tb in text_re:
+        nj_j = index_list[index_list.index(n_jumps) - 1] #! Con esto, lo que hacemos es acceder al espacio anterior del que nos devuelve el min. Es util porque lo que queremos es que NO pase de los 5000 carácteres.
 
-        if len(tb) > string_characters:
-            print(f'Algún texto contiene más de {string_characters} letras. Quiere decir que tiene más de 5000 carácteres sin ningún espacio, cosa extraña.')
-
-
-        elif len(temp_text) + len(tb) <= string_characters:
-            temp_text = temp_text + f' {tb}'
-            temp_list.append(temp_text)
-
-        else:
-            temp_text = tb
-            temp_list.append(tb)
+        new_jumps.append(nj_j)
 
 
 
 
-
-    # for c, tb in enumerate(text_re):
-    #     if len(re) + len(tb) <= string_characters:
-    #         re = re + f' {tb}'
-        
-    #     else:
-    #         re_list.append(re)
-    #         re = ''
-
-            
-    #         for d in range(c):
-    #             text_re.pop(0)
-                
-            
-    #     continue
-
-            
-    # print(text_re)
-        
-
-
-
-
-    # for r in range(len(text_re)):
-    #     for c, tb in enumerate(text_re):
-    #         if len(re) + len(tb) <= string_characters:
-    #             re = re + f' {tb}'
-
-    #         text_re.remove(tb)
-    #     re_list.append(re)
-    #     continue
-
-    # print(re_list)
 
 
     # =====================================
-    
-    
-    for e, jump in enumerate(jumps[:-1]): # Separamos el string teniendo en cuenta los saltos.
+
+
+    for e, jump in enumerate(new_jumps[:-1]): # Separamos el string teniendo en cuenta los saltos.
         
         
-        if e != len(jumps) - 2:
-            text_list.append(raw_text[jump:jumps[e + 1]])   
+        if e != len(new_jumps) - 2:
+            text_list.append(raw_text[jump:new_jumps[e + 1]])   
             
-        elif e == len(jumps) - 2:
+        elif e == len(new_jumps) - 2:
             text_list.append(raw_text[jump:])
             
             # print(len(raw_text[jump:]))
-    
-        
-    
+
+
+    # =====================================
+
+
     processed_list = []
     
     for string in text_list: # Remplazamos con los caracteres clave que usa DeepL. Luego usaremos
@@ -222,8 +190,9 @@ def file_translate(route:str, string_characters = 4999, l_from = 'en', l_to = 'e
                              # virgen.
                 
         string = string.replace(' ', '%20') # Para los espacios!
-        string = string.replace(',', '%2C') # Para los espacios!
-        string = string.replace('\t', r'%20%20%20%20') # Para los espacios!
+        string = string.replace(',', '%2C') # Para las comas.
+        string = string.replace('\ufeff', r'')
+        string = string.replace('\t', r'%20%20%20%20') # Para las tabulaciones
         string = string.replace('\n', '%0A') # Para los saltos de linea!
         string = string.replace('?', '%3F') # Para los signos de interrogación.
         
@@ -251,11 +220,6 @@ def file_translate(route:str, string_characters = 4999, l_from = 'en', l_to = 'e
     for string_processed in processed_list:
         url_pro = raw_consult_url + string_processed
         urls_list.append(url_pro)
-        
-    
-
-    
-    
     
     chrome_options = Options()
     chrome_options.headless = True # Para que se ejecute sin una interfaz grafica.
@@ -268,7 +232,6 @@ def file_translate(route:str, string_characters = 4999, l_from = 'en', l_to = 'e
     
     text_translate = ''
     
-    # print(urls_list)
     
     print('Traduciendo archivo!!')
 
@@ -283,11 +246,17 @@ def file_translate(route:str, string_characters = 4999, l_from = 'en', l_to = 'e
 
         translate_save = browser.find_element(By.ID, 'target-dummydiv')
 
-        text_translate = text_translate + translate_save.get_attribute('outerHTML')
-        text_f = text_translate[text_translate.find('>') + 1:-8]
+        translate_text = translate_save.get_attribute('outerHTML')[translate_save.get_attribute('outerHTML').find('>') + 1:-8]
+
+
+        text_translate = text_translate + f' {translate_text}'
 
 
 
+
+
+    browser.get('http://deepl.com')
+    text_f = text_translate.strip()
     
     text_f = text_f.replace('--8', '-->') # Para los espacios!
     text_f = text_f.replace('--i--', '<i>') # Para éstas etiquetas, que al parecer daban bug.
@@ -391,38 +360,57 @@ def string_translate(text, string_characters = 4999, l_from = 'en', l_to = 'es')
     
     # =====================================
     
-    
-    
-    
+    # ====================================
+
     text_list = []
-    
-    for e, jump in enumerate(jumps[:-1]): # Separamos el string teniendo en cuenta los saltos.
+    index_list = []
+    new_jumps = [0]
+
+    for ei, index_space in enumerate(text):
+        if index_space == ' ':
+            index_list.append(ei)
+
+
+    for nj in jumps[1:]:
+        n_jumps = min(index_list, key = lambda x: abs(x - nj)) # Esto devuelve el indíce de los espacios!
+
+        nj_j = index_list[index_list.index(n_jumps) - 1]
+
+        new_jumps.append(nj_j)
+
+
+
+
+
+
+    # =====================================
+
+
+    for e, jump in enumerate(new_jumps[:-1]): # Separamos el string teniendo en cuenta los saltos.
         
         
-        if e != len(jumps) - 2:
-            text_list.append(text[jump:jumps[e + 1]])   
+        if e != len(new_jumps) - 2:
+            text_list.append(text[jump:new_jumps[e + 1]])   
             
-        elif e == len(jumps) - 2:
+        elif e == len(new_jumps) - 2:
             text_list.append(text[jump:])
             
-    
-
-    
-    raw_consult_url = f'https://www.deepl.com/translator#{l_from}/{l_to}/' # URL del traductor
+            # print(len(text[jump:]))
 
 
+    # =====================================
 
-    
+
     processed_list = []
     
     for string in text_list: # Remplazamos con los caracteres clave que usa DeepL. Luego usaremos
                              # esto mismo, pero a la inversa, para obtener nuevamente el string
-                             # virgen. 
-                             #TODO: VER SI NECESITO AÑADIR/CAMBIAR OTROS CARACTERES (que casi seguro que sí).
+                             # virgen.
                 
         string = string.replace(' ', '%20') # Para los espacios!
-        string = string.replace(',', '%2C') # Para los espacios!
-        string = string.replace('\t', r'%20%20%20%20') # Para los espacios!
+        string = string.replace(',', '%2C') # Para las comas.
+        string = string.replace('\ufeff', r'')
+        string = string.replace('\t', r'%20%20%20%20') # Para las tabulaciones
         string = string.replace('\n', '%0A') # Para los saltos de linea!
         string = string.replace('?', '%3F') # Para los signos de interrogación.
         
@@ -443,6 +431,7 @@ def string_translate(text, string_characters = 4999, l_from = 'en', l_to = 'es')
     
     
     
+    raw_consult_url = f'https://www.deepl.com/translator#{l_from}/{l_to}/' # URL del traductor
     # Generemos la URL de consulta con cada uno de los strings.
     
     urls_list = []
@@ -486,14 +475,17 @@ def string_translate(text, string_characters = 4999, l_from = 'en', l_to = 'es')
 
         translate_save = browser.find_element(By.ID, 'target-dummydiv')
 
-        text_translate = text_translate + translate_save.get_attribute('outerHTML')
-        text_f = text_translate[text_translate.find('>') + 1:-8]
+        translate_text = translate_save.get_attribute('outerHTML')[translate_save.get_attribute('outerHTML').find('>') + 1:-8]
+
+
+        text_translate = text_translate + f' {translate_text}'
+
+
 
 
         
 
-
-
+    text_f = text_translate.strip()
     
     text_f = text_f.replace('--8', '-->') # Para los espacios!
     text_f = text_f.replace('--i--', '<i>') # Para éstas etiquetas, que al parecer daban bug.
@@ -508,8 +500,3 @@ def string_translate(text, string_characters = 4999, l_from = 'en', l_to = 'es')
     print(f'\n\nSe ha traducido correctamente el texto!\n\n')
 
     return text_f
-
-
-
-
-a = file_translate('C:/Users/ferdh/Downloads/Izquierda.txt', 4999, 'es', 'en', True, 'txt')
