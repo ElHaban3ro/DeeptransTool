@@ -13,13 +13,11 @@ To fulfill the **purpose**, we make use of ***Selenium*** and the browser [Chrom
 
 
 
-## (v1.3) ¿What's New?
+## (v1.4) ¿What's New?
 ---
-- Support for reading and translating PDF's. (Remember that pdf's are a more complex file type than a simple txt or srt, therefore, when creating a new file you may experience line breaks that are not applicable or not applicable at all, this, because of how a pdf is composed). You can use the function to translate PDF's ONLY by creating a new file.
-- Error handling.
-- Support for more characters (it is a problem how some signs that are passed by the url are translated, therefore, signs like "/", are translated by the translator as "%5C%2F", and if they are not corrected, they can cause serious problems. I will be attentive to your feedback to add this kind of characters to the package so that they do not cause errors).
+- Apparently they changed the structure of how the deepl.com page is built, and therefore, the scrapper stopped working. It's fixed!
 
-- A better way to cut the text and pass it to DeepL (apparently, it sometimes caused errors due to words being cut off).
+- The scrapp system was changed in the text. We now use "Beautifulsoup4" which will prevent us from errors in the future!
 
 
 ## Functions

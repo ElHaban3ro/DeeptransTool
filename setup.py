@@ -13,7 +13,7 @@ setup(
     long_description = long_description,
     long_description_content_type = 'text/markdown',
     packages = ['DTT'],
-    version = '1.3',
+    version = '1.4',
     license = 'GPLv3',
     description = "Use the world's best translator (DeepL) to translate your text files or text itself!! All without having to provide your credit card or be limited by the API. 🐸",
     author = 'ElHaban3ro',
@@ -23,5 +23,5 @@ setup(
     classifiers = [
         'Programming Language :: Python :: 3.10'
     ],
-    install_requires=['selenium==4.5.0', 'webdriver-manager==3.8.3', 'PyPDF2']
+    install_requires=['selenium==4.5.0', 'webdriver-manager==3.8.3', 'PyPDF2', 'beautifulsoup4==4.12.2']
 )

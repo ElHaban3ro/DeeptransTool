@@ -14,6 +14,9 @@ from webdriver_manager.chrome import ChromeDriverManager
 from PyPDF2 import PdfReader
 
 
+# BeautifulSoup. Con esta librería podemos de forma más sencilla el texto.
+from bs4 import BeautifulSoup
+
 
 
 # Others Imports:
@@ -244,9 +247,13 @@ def file_translate(route:str, string_characters = 4999, l_from = 'en', l_to = 'e
         
         time.sleep(5) #TODO USAR ES NECESARIO. EL TIEMPO DE ESPERA PUEDE VARIAR, VER QUE TAL FUNCIONA CON UN TIEMPO MÁS BAJO. 
 
-        translate_save = browser.find_element(By.ID, 'target-dummydiv')
+        translate_save = browser.find_element(By.CLASS_NAME, 'lmt__inner_textarea_container')
+        translate_save = translate_save[1]
 
         translate_text = translate_save.get_attribute('outerHTML')[translate_save.get_attribute('outerHTML').find('>') + 1:-8]
+
+        soup = BeautifulSoup(translate_text)
+        translate_text = soup.find('p').getText()
 
 
         text_translate = text_translate + f' {translate_text}'
@@ -307,6 +314,7 @@ def file_translate(route:str, string_characters = 4999, l_from = 'en', l_to = 'e
 
 
 def string_translate(text, string_characters = 4999, l_from = 'en', l_to = 'es'):
+
     """
     Use the world's "best translator" to translate any text and make use of it, without any restrictions!
     
@@ -440,16 +448,7 @@ def string_translate(text, string_characters = 4999, l_from = 'en', l_to = 'es')
         url_pro = raw_consult_url + string_processed
         urls_list.append(url_pro)
         
-    # print(urls_list[-1])
-    
-        
 
-        
-        
-        # break # TODO: quitar este break.
-    
-
-    
     
     
     chrome_options = Options()
@@ -473,10 +472,13 @@ def string_translate(text, string_characters = 4999, l_from = 'en', l_to = 'es')
         browser.get(link_part)
         time.sleep(5) # USAR ES NECESARIO.
 
-        translate_save = browser.find_element(By.ID, 'target-dummydiv')
+        translate_save = browser.find_elements(By.CLASS_NAME, 'lmt__inner_textarea_container')
+        translate_save = translate_save[1]
 
         translate_text = translate_save.get_attribute('outerHTML')[translate_save.get_attribute('outerHTML').find('>') + 1:-8]
 
+        soup = BeautifulSoup(translate_text)
+        translate_text = soup.find('p').getText()
 
         text_translate = text_translate + f' {translate_text}'
 
